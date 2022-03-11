@@ -101,11 +101,22 @@ export class EmployeeCalculate extends Component {
     const requestOptions = {
         method: 'POST',
         headers: !token ? {} : { 'Authorization': `Bearer ${token}`,'Content-Type': 'application/json' },
-        body: JSON.stringify({id: this.state.id,absentDays: this.state.absentDays,workedDays: this.state.workedDays})
+        body: JSON.stringify({ id: this.state.id, absentDays: Number(this.state.absentDays), workedDays: Number(this.state.workedDays)})
     };
-    const response = await fetch('api/employees/' + this.state.id + '/calculate',requestOptions);
-    const data = await response.json();
-    this.setState({ loadingCalculate: false,netIncome: data });
+      const response = await fetch('api/employees/' + this.state.id + '/calculate', requestOptions);
+      if (response.status === 200) {
+          const data = await response.json();
+          const options = {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+          };
+          this.setState({ loadingCalculate: false, netIncome: Number(data).toLocaleString('en', options) });
+      }
+      else {
+          alert("There's an invalid parameters.");
+          this.setState({ loading: false, loadingCalculate: false });
+      }
+      
   }
 
   async getEmployee(id) {

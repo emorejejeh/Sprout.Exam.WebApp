@@ -1,16 +1,15 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Sprout.Exam.WebApp.Data;
-using Sprout.Exam.WebApp.Models;
+using Sprout.Exam.Business.Services;
+using Sprout.Exam.Business.Services.Interfaces;
+using Sprout.Exam.DataAccess.Data;
+using Sprout.Exam.DataAccess.Models;
 
 namespace Sprout.Exam.WebApp
 {
@@ -26,17 +25,19 @@ namespace Sprout.Exam.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddScoped<IEmployeeService, EmployeeService>();
+            services.AddScoped<IEmployeeServiceFactory, EmployeeServiceFactory>();
+            services.AddDbContext<EmployeeDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDatabaseDeveloperPageExceptionFilter();
 
             services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<EmployeeDbContext>();
 
             services.AddIdentityServer()
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+                .AddApiAuthorization<ApplicationUser, EmployeeDbContext>();
 
             services.AddAuthentication()
                 .AddIdentityServerJwt();
@@ -49,6 +50,7 @@ namespace Sprout.Exam.WebApp
             {
                 configuration.RootPath = "ClientApp/build";
             });
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
